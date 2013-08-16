@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-var downloader, cli,
+var handler, cli,
     _           = require('lodash')
     Downloader  = require('./lib/Downloader'),
+    Migrator    = require('./lib/Migrator'),
     fs          = require('fs'),
     cli         = require('commander'),
     optimist    = require('optimist'),
@@ -15,16 +16,17 @@ fs.exists(configFile, function(exists){
     fs.readFile(configFile, function (err, data) {
       if (err) throw err;
       var config = JSON.parse(data);
-      downloader = new Downloader(config);
 
       switch (cli._[0]) {
-        case 'start':
-          downloader.start(done);
+        case 'download':
+          handler = new Downloader(config);
           break;
-        case 'resume':
-          downloader.resume(done);
+        case 'migrate':
+          handler = new Migrator(config);
           break;
       }
+
+      handler[cli._[1]](done);
 
       function done(err) {
         if (err) throw err;
